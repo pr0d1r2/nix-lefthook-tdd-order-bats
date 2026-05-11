@@ -1,0 +1,10 @@
+---
+pre-commit:
+  commands:
+    tdd-order:
+      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
+
+pre-push:
+  commands:
+    tdd-order:
+      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats

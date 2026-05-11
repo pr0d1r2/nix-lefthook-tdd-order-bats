@@ -1,0 +1,13 @@
+result
+result-*
+.direnv
+.claude/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.yml
+secrets.yaml
