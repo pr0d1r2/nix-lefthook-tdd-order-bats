@@ -68,7 +68,7 @@ remotes:
 pre-commit:
   parallel: true
   commands:
-    tdd-order:
+    tdd-order-bats:
       run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
     nix-flake-check:
       glob: "*.nix"
@@ -77,7 +77,7 @@ pre-commit:
 pre-push:
   parallel: true
   commands:
-    tdd-order:
+    tdd-order-bats:
       run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
     nix-flake-check:
       glob: "*.nix"
