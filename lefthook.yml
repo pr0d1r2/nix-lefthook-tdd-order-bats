@@ -69,6 +69,9 @@ pre-commit:
   parallel: true
   commands:
     tdd-order-bats:
+      env:
+        LEFTHOOK_TDD_SPEC_DIR: tests/unit
+        LEFTHOOK_TDD_SRC_STRIP: ""
       run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
     nix-flake-check:
       glob: "*.nix"
@@ -78,6 +81,9 @@ pre-push:
   parallel: true
   commands:
     tdd-order-bats:
+      env:
+        LEFTHOOK_TDD_SPEC_DIR: tests/unit
+        LEFTHOOK_TDD_SRC_STRIP: ""
       run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
     nix-flake-check:
       glob: "*.nix"

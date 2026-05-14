@@ -36,8 +36,38 @@ setup() {
     assert_output "tests/build/my-tool.bats"
 }
 
-@test "top-level script outside scripts/" {
+@test "top-level script outside scripts/ has no dot dir" {
     run bash "$SCRIPT" "helper.sh"
     assert_success
-    assert_line --index 0 "tests/./helper.bats"
+    assert_line --index 0 "tests/helper.bats"
+}
+
+@test "LEFTHOOK_TDD_SPEC_DIR overrides spec directory" {
+    LEFTHOOK_TDD_SPEC_DIR="tests/unit" run bash "$SCRIPT" "scripts/build/deploy.sh"
+    assert_success
+    assert_line --index 0 "tests/unit/build/deploy.bats"
+}
+
+@test "LEFTHOOK_TDD_SRC_STRIP overrides strip prefix" {
+    LEFTHOOK_TDD_SRC_STRIP="lib" run bash "$SCRIPT" "lib/utils/helper.sh"
+    assert_success
+    assert_line --index 0 "tests/utils/helper.bats"
+}
+
+@test "LEFTHOOK_TDD_SRC_STRIP empty disables stripping" {
+    LEFTHOOK_TDD_SRC_STRIP="" run bash "$SCRIPT" "scripts/build/deploy.sh"
+    assert_success
+    assert_line --index 0 "tests/scripts/build/deploy.bats"
+}
+
+@test "both SPEC_DIR and SRC_STRIP combined" {
+    LEFTHOOK_TDD_SPEC_DIR="tests/unit" LEFTHOOK_TDD_SRC_STRIP="" run bash "$SCRIPT" "scripts/build/deploy.sh"
+    assert_success
+    assert_line --index 0 "tests/unit/scripts/build/deploy.bats"
+}
+
+@test "top-level file with custom spec dir" {
+    LEFTHOOK_TDD_SPEC_DIR="tests/unit" run bash "$SCRIPT" "helper.sh"
+    assert_success
+    assert_line --index 0 "tests/unit/helper.bats"
 }
