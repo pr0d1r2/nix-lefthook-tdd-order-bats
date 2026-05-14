@@ -37,15 +37,32 @@
     in
     {
       packages = forAllSystems (pkgs: {
-        default = pkgs.writeShellApplication {
-          name = "lefthook-tdd-order-bats";
-          runtimeInputs = [
-            pkgs.git
-            pkgs.gnused
-            pkgs.coreutils
-          ];
-          text = builtins.readFile ./lefthook-tdd-order-bats.sh;
-        };
+        default =
+          let
+            isExcludedPath = pkgs.writeText "is-excluded-path.sh" (builtins.readFile ./is-excluded-path.sh);
+            specPathForFile = pkgs.writeText "spec-path-for-file.sh" (
+              builtins.readFile ./spec-path-for-file.sh
+            );
+          in
+          pkgs.writeShellApplication {
+            name = "lefthook-tdd-order-bats";
+            runtimeInputs = [
+              pkgs.git
+              pkgs.gnused
+              pkgs.coreutils
+            ];
+            text =
+              builtins.replaceStrings
+                [
+                  "@IS_EXCLUDED_PATH@"
+                  "@SPEC_PATH_FOR_FILE@"
+                ]
+                [
+                  "${isExcludedPath}"
+                  "${specPathForFile}"
+                ]
+                (builtins.readFile ./lefthook-tdd-order-bats.sh);
+          };
       });
 
       devShells = forAllSystems (
