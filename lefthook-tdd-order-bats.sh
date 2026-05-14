@@ -29,41 +29,16 @@ if [ "${#commits[@]}" -eq 0 ]; then
 fi
 
 read -ra scan_patterns <<<"${LEFTHOOK_TDD_PATHS:-:(glob)**/*.sh}"
-IFS=':' read -ra exclude_patterns <<<"${LEFTHOOK_TDD_EXCLUDE:-}"
 
 failed=0
 for c in "${commits[@]}"; do
     while IFS= read -r f; do
         [ -n "$f" ] || continue
-        skip=0
-        for pattern in "${exclude_patterns[@]}"; do
-            [ -z "$pattern" ] && continue
-            # shellcheck disable=SC2254
-            case "$f" in
-                $pattern)
-                    skip=1
-                    break
-                    ;;
-            esac
-        done
-        [ "$skip" -eq 1 ] && continue
-        raw_stem="$(basename "$f")"
-        raw_stem="${raw_stem%.sh}"
-        norm_stem="${raw_stem//_/-}"
-        case "$f" in
-            scripts/*)
-                dir="$(echo "$f" | sed 's|^scripts/||; s|/[^/]*$||')"
-                candidates=("tests/${dir}/${norm_stem}.bats")
-                [ "$raw_stem" != "$norm_stem" ] &&
-                    candidates+=("tests/${dir}/${raw_stem}.bats")
-                ;;
-            *)
-                dir="$(dirname "$f")"
-                candidates=("tests/${dir}/${norm_stem}.bats")
-                [ "$raw_stem" != "$norm_stem" ] &&
-                    candidates+=("tests/${dir}/${raw_stem}.bats")
-                ;;
-        esac
+        bash @IS_EXCLUDED_PATH@ "$f" "${LEFTHOOK_TDD_EXCLUDE:-}" && continue
+
+        mapfile -t candidates < <(bash @SPEC_PATH_FOR_FILE@ "$f")
+        [ "${#candidates[@]}" -eq 0 ] && continue
+
         found=0
         for spec in "${candidates[@]}"; do
             if git cat-file -e "$c:$spec" 2>/dev/null; then
