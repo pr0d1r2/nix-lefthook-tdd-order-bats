@@ -1,4 +1,5 @@
 #!/usr/bin/env bats
+# shellcheck disable=SC2030,SC2031
 
 setup() {
     load "${BATS_LIB_PATH}/bats-support/load.bash"
@@ -129,6 +130,62 @@ setup() {
     git rev-parse HEAD > .my-baseline
     git add .my-baseline
     git commit -m "add baseline" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}
+
+@test "LEFTHOOK_TDD_SPEC_DIR overrides test directory" {
+    export LEFTHOOK_TDD_SPEC_DIR="tests/unit"
+    mkdir -p scripts/foo tests/unit/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    echo '#!/usr/bin/env bats' > tests/unit/foo/bar.bats
+    git add scripts/foo/bar.sh tests/unit/foo/bar.bats
+    git commit -m "add script with spec in tests/unit" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}
+
+@test "LEFTHOOK_TDD_SPEC_DIR fails when spec in wrong dir" {
+    export LEFTHOOK_TDD_SPEC_DIR="tests/unit"
+    mkdir -p scripts/foo tests/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    echo '#!/usr/bin/env bats' > tests/foo/bar.bats
+    git add scripts/foo/bar.sh tests/foo/bar.bats
+    git commit -m "spec in tests/ not tests/unit/" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_failure
+}
+
+@test "LEFTHOOK_TDD_SRC_STRIP empty disables prefix stripping" {
+    export LEFTHOOK_TDD_SRC_STRIP=""
+    mkdir -p scripts/foo tests/scripts/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    echo '#!/usr/bin/env bats' > tests/scripts/foo/bar.bats
+    git add scripts/foo/bar.sh tests/scripts/foo/bar.bats
+    git commit -m "keep scripts/ in test path" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}
+
+@test "LEFTHOOK_TDD_SRC_STRIP custom prefix" {
+    export LEFTHOOK_TDD_SRC_STRIP="lib"
+    mkdir -p lib/utils tests/utils
+    echo '#!/bin/bash' > lib/utils/helper.sh
+    echo '#!/usr/bin/env bats' > tests/utils/helper.bats
+    git add lib/utils/helper.sh tests/utils/helper.bats
+    git commit -m "strip lib/ prefix" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}
+
+@test "combined SPEC_DIR and SRC_STRIP for nix-config layout" {
+    export LEFTHOOK_TDD_SPEC_DIR="tests/unit"
+    export LEFTHOOK_TDD_SRC_STRIP=""
+    mkdir -p scripts/lefthook tests/unit/scripts/lefthook
+    echo '#!/bin/bash' > scripts/lefthook/check.sh
+    echo '#!/usr/bin/env bats' > tests/unit/scripts/lefthook/check.bats
+    git add scripts/lefthook/check.sh tests/unit/scripts/lefthook/check.bats
+    git commit -m "nix-config layout" >/dev/null 2>&1
     run lefthook-tdd-order-bats
     assert_success
 }
