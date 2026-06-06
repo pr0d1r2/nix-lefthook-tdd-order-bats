@@ -12,10 +12,6 @@
       url = "github:pr0d1r2/nix-dev-shell-agentic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-lefthook-unicode-lint = {
-      url = "github:pr0d1r2/nix-lefthook-unicode-lint";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
