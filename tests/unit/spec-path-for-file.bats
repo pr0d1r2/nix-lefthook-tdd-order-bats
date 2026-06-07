@@ -4,6 +4,9 @@ setup() {
     load "${BATS_LIB_PATH}/bats-support/load.bash"
     load "${BATS_LIB_PATH}/bats-assert/load.bash"
 
+    unset LEFTHOOK_TDD_SPEC_DIR
+    unset LEFTHOOK_TDD_SRC_STRIP
+
     SCRIPT="$BATS_TEST_DIRNAME/../../spec-path-for-file.sh"
 }
 
