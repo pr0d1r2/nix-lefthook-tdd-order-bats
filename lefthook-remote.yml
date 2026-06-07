@@ -2,7 +2,7 @@
 pre-commit:
   commands:
     tdd-order-bats:
-      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
+      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats --staged {staged_files}
 
 pre-push:
   commands:
