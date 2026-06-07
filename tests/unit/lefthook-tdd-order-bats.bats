@@ -5,6 +5,13 @@ setup() {
     load "${BATS_LIB_PATH}/bats-support/load.bash"
     load "${BATS_LIB_PATH}/bats-assert/load.bash"
 
+    unset LEFTHOOK_TDD_SPEC_DIR
+    unset LEFTHOOK_TDD_SRC_STRIP
+    unset LEFTHOOK_TDD_PATHS
+    unset LEFTHOOK_TDD_EXCLUDE
+    unset LEFTHOOK_TDD_BASELINE
+    unset LEFTHOOK_TDD_ALLOW_GAP
+
     TMP="$BATS_TEST_TMPDIR/repo"
     mkdir -p "$TMP"
     git init "$TMP" >/dev/null 2>&1
@@ -18,6 +25,8 @@ setup() {
     git tag base
     export LEFTHOOK_TDD_BASE_REF="base"
 }
+
+# --- range mode (default, for pre-push) ---
 
 @test "exits 0 when LEFTHOOK_TDD_ALLOW_GAP is set" {
     export LEFTHOOK_TDD_ALLOW_GAP=1
@@ -178,6 +187,19 @@ setup() {
     assert_success
 }
 
+@test "exits 0 when spec added in later commit within range" {
+    mkdir -p scripts/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    git add scripts/foo/bar.sh
+    git commit -m "add script without spec" >/dev/null 2>&1
+    mkdir -p tests/foo
+    echo '#!/usr/bin/env bats' > tests/foo/bar.bats
+    git add tests/foo/bar.bats
+    git commit -m "add spec for bar" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}
+
 @test "combined SPEC_DIR and SRC_STRIP for nix-config layout" {
     export LEFTHOOK_TDD_SPEC_DIR="tests/unit"
     export LEFTHOOK_TDD_SRC_STRIP=""
@@ -187,5 +209,73 @@ setup() {
     git add scripts/lefthook/check.sh tests/unit/scripts/lefthook/check.bats
     git commit -m "nix-config layout" >/dev/null 2>&1
     run lefthook-tdd-order-bats
+    assert_success
+}
+
+# --- staged mode (--staged, for pre-commit) ---
+
+@test "staged: exits 0 when no staged .sh files" {
+    echo "readme" > notes.md
+    git add notes.md
+    run lefthook-tdd-order-bats --staged
+    assert_success
+}
+
+@test "staged: exits 0 when staged .sh has matching spec in worktree" {
+    mkdir -p scripts/foo tests/foo
+    echo '#!/usr/bin/env bats' > tests/foo/bar.bats
+    git add tests/foo/bar.bats
+    git commit -m "add spec first" >/dev/null 2>&1
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    git add scripts/foo/bar.sh
+    run lefthook-tdd-order-bats --staged
+    assert_success
+}
+
+@test "staged: exits 0 when spec staged alongside script" {
+    mkdir -p scripts/foo tests/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    echo '#!/usr/bin/env bats' > tests/foo/bar.bats
+    git add scripts/foo/bar.sh tests/foo/bar.bats
+    run lefthook-tdd-order-bats --staged
+    assert_success
+}
+
+@test "staged: fails when staged .sh has no spec" {
+    mkdir -p scripts/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    git add scripts/foo/bar.sh
+    run lefthook-tdd-order-bats --staged
+    assert_failure
+    assert_output --partial "tdd-order: staged"
+}
+
+@test "staged: does not check old commits" {
+    mkdir -p scripts/old
+    echo '#!/bin/bash' > scripts/old/gap.sh
+    git add scripts/old/gap.sh
+    git commit -m "old script without spec" >/dev/null 2>&1
+    # new commit with non-.sh file
+    echo "data" > config.yml
+    git add config.yml
+    run lefthook-tdd-order-bats --staged
+    assert_success
+}
+
+@test "staged: respects LEFTHOOK_TDD_EXCLUDE" {
+    export LEFTHOOK_TDD_EXCLUDE="scripts/vendor/*"
+    mkdir -p scripts/vendor
+    echo '#!/bin/bash' > scripts/vendor/lib.sh
+    git add scripts/vendor/lib.sh
+    run lefthook-tdd-order-bats --staged
+    assert_success
+}
+
+@test "staged: respects LEFTHOOK_TDD_ALLOW_GAP" {
+    export LEFTHOOK_TDD_ALLOW_GAP=1
+    mkdir -p scripts/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    git add scripts/foo/bar.sh
+    run lefthook-tdd-order-bats --staged
     assert_success
 }
