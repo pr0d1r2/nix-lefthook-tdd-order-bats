@@ -72,7 +72,7 @@ pre-commit:
       env:
         LEFTHOOK_TDD_SPEC_DIR: tests/unit
         LEFTHOOK_TDD_SRC_STRIP: ""
-      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats --staged
+      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats --staged {staged_files}
     nix-flake-check:
       glob: "*.nix"
       run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check

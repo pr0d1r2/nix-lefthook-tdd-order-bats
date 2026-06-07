@@ -212,53 +212,50 @@ setup() {
     assert_success
 }
 
-# --- staged mode (--staged, for pre-commit) ---
+# --- staged mode (--staged <files>, for pre-commit) ---
 
-@test "staged: exits 0 when no staged .sh files" {
-    echo "readme" > notes.md
-    git add notes.md
+@test "staged: exits 0 when no .sh files in list" {
+    run lefthook-tdd-order-bats --staged notes.md config.yml
+    assert_success
+}
+
+@test "staged: exits 0 with empty file list" {
     run lefthook-tdd-order-bats --staged
     assert_success
 }
 
-@test "staged: exits 0 when staged .sh has matching spec in worktree" {
+@test "staged: exits 0 when .sh has matching spec in worktree" {
     mkdir -p scripts/foo tests/foo
     echo '#!/usr/bin/env bats' > tests/foo/bar.bats
     git add tests/foo/bar.bats
     git commit -m "add spec first" >/dev/null 2>&1
     echo '#!/bin/bash' > scripts/foo/bar.sh
-    git add scripts/foo/bar.sh
-    run lefthook-tdd-order-bats --staged
+    run lefthook-tdd-order-bats --staged scripts/foo/bar.sh
     assert_success
 }
 
-@test "staged: exits 0 when spec staged alongside script" {
+@test "staged: exits 0 when spec exists alongside script" {
     mkdir -p scripts/foo tests/foo
     echo '#!/bin/bash' > scripts/foo/bar.sh
     echo '#!/usr/bin/env bats' > tests/foo/bar.bats
-    git add scripts/foo/bar.sh tests/foo/bar.bats
-    run lefthook-tdd-order-bats --staged
+    run lefthook-tdd-order-bats --staged scripts/foo/bar.sh tests/foo/bar.bats
     assert_success
 }
 
-@test "staged: fails when staged .sh has no spec" {
+@test "staged: fails when .sh has no spec" {
     mkdir -p scripts/foo
     echo '#!/bin/bash' > scripts/foo/bar.sh
-    git add scripts/foo/bar.sh
-    run lefthook-tdd-order-bats --staged
+    run lefthook-tdd-order-bats --staged scripts/foo/bar.sh
     assert_failure
     assert_output --partial "tdd-order: staged"
 }
 
-@test "staged: does not check old commits" {
+@test "staged: ignores old commits — only checks given files" {
     mkdir -p scripts/old
     echo '#!/bin/bash' > scripts/old/gap.sh
     git add scripts/old/gap.sh
     git commit -m "old script without spec" >/dev/null 2>&1
-    # new commit with non-.sh file
-    echo "data" > config.yml
-    git add config.yml
-    run lefthook-tdd-order-bats --staged
+    run lefthook-tdd-order-bats --staged config.yml
     assert_success
 }
 
@@ -266,8 +263,7 @@ setup() {
     export LEFTHOOK_TDD_EXCLUDE="scripts/vendor/*"
     mkdir -p scripts/vendor
     echo '#!/bin/bash' > scripts/vendor/lib.sh
-    git add scripts/vendor/lib.sh
-    run lefthook-tdd-order-bats --staged
+    run lefthook-tdd-order-bats --staged scripts/vendor/lib.sh
     assert_success
 }
 
@@ -275,7 +271,14 @@ setup() {
     export LEFTHOOK_TDD_ALLOW_GAP=1
     mkdir -p scripts/foo
     echo '#!/bin/bash' > scripts/foo/bar.sh
-    git add scripts/foo/bar.sh
-    run lefthook-tdd-order-bats --staged
+    run lefthook-tdd-order-bats --staged scripts/foo/bar.sh
+    assert_success
+}
+
+@test "staged: filters non-.sh from mixed file list" {
+    mkdir -p scripts/foo tests/foo
+    echo '#!/bin/bash' > scripts/foo/bar.sh
+    echo '#!/usr/bin/env bats' > tests/foo/bar.bats
+    run lefthook-tdd-order-bats --staged scripts/foo/bar.sh README.md flake.nix
     assert_success
 }

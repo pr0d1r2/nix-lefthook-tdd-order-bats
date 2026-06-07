@@ -1,9 +1,9 @@
 # shellcheck shell=bash
 # Lefthook-compatible TDD order enforcer for bats.
 # Verifies implementation commits include corresponding bats specs.
-# Usage: lefthook-tdd-order-bats [--staged]
-#   --staged: only check staged files (for pre-commit)
-#   default:  walk commit range base..HEAD (for pre-push)
+# Usage: lefthook-tdd-order-bats [--staged file1 file2 ...]
+#   --staged <files>: check given files for matching specs (pre-commit)
+#   default:          walk commit range base..HEAD (pre-push)
 # NOTE: sourced by writeShellApplication — no shebang or set needed.
 
 if [ "${LEFTHOOK_TDD_ALLOW_GAP:-0}" = "1" ]; then
@@ -13,22 +13,23 @@ fi
 staged_mode=0
 if [ "${1:-}" = "--staged" ]; then
   staged_mode=1
+  shift
 fi
 
-read -ra scan_patterns <<<"${LEFTHOOK_TDD_PATHS:-:(glob)**/*.sh}"
-
 if [ "$staged_mode" -eq 1 ]; then
-  mapfile -t staged_files < <(
-    git diff --cached --name-only --diff-filter=AM \
-      -- "${scan_patterns[@]}" 2>/dev/null
-  )
-  if [ "${#staged_files[@]}" -eq 0 ]; then
+  files=()
+  for f in "$@"; do
+    [ -f "$f" ] || continue
+    case "$f" in
+      *.sh) files+=("$f") ;;
+    esac
+  done
+  if [ "${#files[@]}" -eq 0 ]; then
     exit 0
   fi
 
   failed=0
-  for f in "${staged_files[@]}"; do
-    [ -n "$f" ] || continue
+  for f in "${files[@]}"; do
     bash @IS_EXCLUDED_PATH@ "$f" "${LEFTHOOK_TDD_EXCLUDE:-}" && continue
 
     mapfile -t candidates < <(bash @SPEC_PATH_FOR_FILE@ "$f")
@@ -36,7 +37,7 @@ if [ "$staged_mode" -eq 1 ]; then
 
     found=0
     for spec in "${candidates[@]}"; do
-      if [ -f "$spec" ] || git diff --cached --name-only | grep -qxF "$spec"; then
+      if [ -f "$spec" ]; then
         found=1
         break
       fi
@@ -80,6 +81,8 @@ mapfile -t commits < <(git rev-list "${rev_args[@]}")
 if [ "${#commits[@]}" -eq 0 ]; then
   exit 0
 fi
+
+read -ra scan_patterns <<<"${LEFTHOOK_TDD_PATHS:-:(glob)**/*.sh}"
 
 failed=0
 for c in "${commits[@]}"; do
