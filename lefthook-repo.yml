@@ -1,0 +1,25 @@
+# Repo-local checks carried through from vendored lefthook.yml (#126).
+---
+
+pre-commit:
+  commands:
+    tdd-order-bats:
+      env:
+        LEFTHOOK_TDD_SPEC_DIR: tests/unit
+        LEFTHOOK_TDD_SRC_STRIP: ""
+      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats --staged {staged_files}
+    nix-flake-check:
+      glob: "*.nix"
+      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check
+
+
+pre-push:
+  commands:
+    nix-flake-check:
+      glob: "*.nix"
+      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check
+    tdd-order-bats:
+      env:
+        LEFTHOOK_TDD_SPEC_DIR: tests/unit
+        LEFTHOOK_TDD_SRC_STRIP: ""
+      run: timeout ${LEFTHOOK_TDD_ORDER_TIMEOUT:-30} lefthook-tdd-order-bats
