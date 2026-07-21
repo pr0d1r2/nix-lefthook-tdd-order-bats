@@ -11,3 +11,7 @@ result-*
 credentials.json
 secrets.yml
 secrets.yaml
+.direnv/
+.markdownlint.yml
+.yamllint.yml
+lefthook.yml
