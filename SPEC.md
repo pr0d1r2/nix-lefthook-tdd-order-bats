@@ -64,3 +64,4 @@ Lefthook-compatible TDD order enforcer for bats. Verify every `.sh` commit has m
 | id | date | cause | fix |
 |----|------|-------|-----|
 | B1 | 2026-05-11 | `IFS=':'` split destroyed `:(glob)` pathspec prefix — enforcer never found `.sh` files | V15 |
+| B2 | 2026-07-21 | vendored→referenced migration left orphaned `let`/`mkShell` block in `packages` — Nix syntax error (`unexpected '}'`) | removed dead `default` package and orphaned devShell code; extracted embedded shell in `apps.confirm` to `confirm.sh` |
