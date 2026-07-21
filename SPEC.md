@@ -65,3 +65,4 @@ Lefthook-compatible TDD order enforcer for bats. Verify every `.sh` commit has m
 |----|------|-------|-----|
 | B1 | 2026-05-11 | `IFS=':'` split destroyed `:(glob)` pathspec prefix — enforcer never found `.sh` files | V15 |
 | B2 | 2026-07-21 | vendored→referenced migration left orphaned `let`/`mkShell` block in `packages` — Nix syntax error (`unexpected '}'`) | removed dead `default` package and orphaned devShell code; extracted embedded shell in `apps.confirm` to `confirm.sh` |
+| B3 | 2026-07-21 | `apps.confirm` lacked materialization packages and `default` package in `runtimeInputs` — coherence check failed for `lefthook-markdownlint`, `lefthook-markdownlint-agentic`, `lefthook-tdd-order-bats`, `lefthook-yamllint` | restored `packages.*.default` (`writeShellApplication` wrapping `lefthook-tdd-order-bats.sh`); added `mat.packages` + `default` to confirm app and devShell `basePackages` |
