@@ -72,3 +72,4 @@ Lefthook-compatible TDD order enforcer for bats. Verify every `.sh` commit has m
 | B7 | 2026-09-26 | Unit tests hard-coded `${BATS_LIB_PATH}` into `load` paths; the guardrails runner provides Bats' normal library search path without that environment variable | load `bats-support` and `bats-assert` by their library names |
 | B8 | 2026-09-26 | B7 changed the dependency names incompletely, leaving `/load` suffixes that the guardrails Bats library resolver could not resolve | load `bats-support` and `bats-assert` directly |
 | B9 | 2026-09-26 | B8 removed the required `/load` entrypoint suffix; Bats interpreted library directories as single files and every `setup()` aborted | load `bats-support/load` and `bats-assert/load` |
+| B10 | 2026-09-26 | Guardrails' Bats wrapper provided plain Bats without `BATS_LIB_PATH`, so every test using `bats-support/load` and `bats-assert/load` aborted during setup | add Bats with the support and assert libraries to the devShell |
