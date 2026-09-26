@@ -2,8 +2,8 @@
 # shellcheck disable=SC2030,SC2031
 
 setup() {
-    load bats-support
-    load bats-assert
+    load bats-support/load
+    load bats-assert/load
 
     unset LEFTHOOK_TDD_SPEC_DIR
     unset LEFTHOOK_TDD_SRC_STRIP
