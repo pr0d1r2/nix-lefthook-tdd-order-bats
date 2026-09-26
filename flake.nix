@@ -69,26 +69,31 @@
         let
           mat = set-and-setting.lib.materializationFor { inherit pkgs fragments; };
           sys = pkgs.stdenv.hostPlatform.system;
-          batsWithLibraries = pkgs.bats.withLibraries (
-            libraries: [ libraries.bats-assert libraries.bats-support ]
-          );
+          batsWithLibraries = pkgs.bats.withLibraries (libraries: [
+            libraries.bats-assert
+            libraries.bats-support
+          ]);
         in
         set-and-setting.lib.mkDevShells {
           inherit pkgs;
-          basePackages = mat.packages ++ [ self.packages.${sys}.default batsWithLibraries ];
+          basePackages = mat.packages ++ [
+            self.packages.${sys}.default
+            batsWithLibraries
+          ];
           settingHook =
-            builtins.replaceStrings [ "@BATS_LIB_PATH@" ] [ "${batsWithLibraries}" ]
-              (builtins.readFile ./bats-lib-path.env)
+            builtins.replaceStrings [ "@BATS_LIB_PATH@" ] [ "${batsWithLibraries}" ] (
+              builtins.readFile ./bats-lib-path.env
+            )
             + ''
-            ${self.packages.${sys}.setting}/bin/sync-setting .
-            _assemble_out="$(mktemp -d)"
-            FRAGMENTS="${builtins.concatStringsSep " " fragments}" \
-              out="$_assemble_out" \
-              FRAGMENTS_DIR="${set-and-setting}/setting/integrations/lefthook" \
-              bash "${set-and-setting}/setting/lib/assemble-lefthook.sh"
-            cp -f "$_assemble_out/lefthook.yml" lefthook.yml
-            rm -rf "$_assemble_out"
-          '';
+              ${self.packages.${sys}.setting}/bin/sync-setting .
+              _assemble_out="$(mktemp -d)"
+              FRAGMENTS="${builtins.concatStringsSep " " fragments}" \
+                out="$_assemble_out" \
+                FRAGMENTS_DIR="${set-and-setting}/setting/integrations/lefthook" \
+                bash "${set-and-setting}/setting/lib/assemble-lefthook.sh"
+              cp -f "$_assemble_out/lefthook.yml" lefthook.yml
+              rm -rf "$_assemble_out"
+            '';
         }
       );
 
