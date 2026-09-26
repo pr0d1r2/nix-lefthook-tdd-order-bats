@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
 setup() {
-    load bats-support/load
-    load bats-assert/load
+    load bats-support
+    load bats-assert
 
     unset LEFTHOOK_TDD_SPEC_DIR
     unset LEFTHOOK_TDD_SRC_STRIP

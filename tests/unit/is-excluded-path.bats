@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
 setup() {
-    load bats-support/load
-    load bats-assert/load
+    load bats-support
+    load bats-assert
 
     SCRIPT="$BATS_TEST_DIRNAME/../../is-excluded-path.sh"
 }

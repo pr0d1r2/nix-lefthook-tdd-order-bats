@@ -70,3 +70,4 @@ Lefthook-compatible TDD order enforcer for bats. Verify every `.sh` commit has m
 | B5 | 2026-09-26 | `flake.lock` lacked a final newline, causing `editorconfig-checker` to fail on Linux and Darwin | added the required final newline |
 | B6 | 2026-09-26 | `tests/unit/dev.bats` overwrote Bats' reserved `TMPDIR`, deleting its runner directory and causing `teardown_file` failures | use `TEST_TMPDIR` for the fixture workspace |
 | B7 | 2026-09-26 | Unit tests hard-coded `${BATS_LIB_PATH}` into `load` paths; the guardrails runner provides Bats' normal library search path without that environment variable | load `bats-support` and `bats-assert` by their library names |
+| B8 | 2026-09-26 | B7 changed the dependency names incompletely, leaving `/load` suffixes that the guardrails Bats library resolver could not resolve | load `bats-support` and `bats-assert` directly |
