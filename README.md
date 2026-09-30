@@ -22,7 +22,15 @@ Verifies that implementation commits include corresponding bats spec files. When
 | `fragments/example.sh` | `tests/fragments/example.bats` |
 | `pkgs/tool.sh` | `tests/pkgs/tool.bats` |
 
-Scripts under `scripts/` have the `scripts/` prefix stripped for the test path. All other paths map directly under `tests/`. Underscores in filenames are normalized to hyphens when searching for specs (both forms are tried).
+Scripts under `scripts/` have the `scripts/` prefix stripped for the test path.
+
+All other paths map directly under `tests/`.
+
+With the default spec directory, candidates are tried in this order:
+`tests/<dir>/<stem>.bats`, then `tests/unit/<dir>/<stem>.bats`. For
+underscore-containing filenames, the hyphen-normalized name is tried before
+the raw name at each location. Setting `LEFTHOOK_TDD_SPEC_DIR` disables the
+`tests/unit/` fallback and uses only that directory.
 
 ## Usage
 

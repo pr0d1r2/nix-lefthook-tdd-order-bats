@@ -36,7 +36,15 @@ setup() {
 @test "hyphen-only stem produces single candidate" {
     run bash "$SCRIPT" "scripts/build/my-tool.sh"
     assert_success
-    assert_output "tests/build/my-tool.bats"
+    assert_line --index 0 "tests/build/my-tool.bats"
+    assert_line --index 1 "tests/unit/build/my-tool.bats"
+}
+
+@test "default spec directory also proposes unit subdirectory" {
+    run bash "$SCRIPT" "x.sh"
+    assert_success
+    assert_line --index 0 "tests/x.bats"
+    assert_line --index 1 "tests/unit/x.bats"
 }
 
 @test "top-level script outside scripts/ has no dot dir" {
@@ -49,6 +57,7 @@ setup() {
     LEFTHOOK_TDD_SPEC_DIR="tests/unit" run bash "$SCRIPT" "scripts/build/deploy.sh"
     assert_success
     assert_line --index 0 "tests/unit/build/deploy.bats"
+    [ "${#lines[@]}" -eq 1 ]
 }
 
 @test "LEFTHOOK_TDD_SRC_STRIP overrides strip prefix" {
