@@ -43,8 +43,12 @@ if [ "$staged_mode" -eq 1 ]; then
       fi
     done
     if [ "$found" -eq 0 ]; then
+      candidates_text="${candidates[0]}"
+      for ((i = 1; i < ${#candidates[@]}; i++)); do
+        candidates_text+=", ${candidates[i]}"
+      done
       printf 'tdd-order: staged %s but %s not found\n' \
-        "$f" "${candidates[0]}" >&2
+        "$f" "$candidates_text" >&2
       failed=1
     fi
   done
@@ -102,8 +106,12 @@ for c in "${commits[@]}"; do
       fi
     done
     if [ "$found" -eq 0 ]; then
+      candidates_text="${candidates[0]}"
+      for ((i = 1; i < ${#candidates[@]}; i++)); do
+        candidates_text+=", ${candidates[i]}"
+      done
       printf 'tdd-order: %s touches %s but %s missing in its tree\n' \
-        "$(git log -1 --format=%h "$c")" "$f" "${candidates[0]}" >&2
+        "$(git log -1 --format=%h "$c")" "$f" "$candidates_text" >&2
       failed=1
     fi
   done < <(git show --no-renames --name-only --pretty=format: \
