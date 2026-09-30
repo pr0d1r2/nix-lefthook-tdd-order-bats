@@ -67,6 +67,25 @@ setup() {
     assert_output --partial "ERROR"
 }
 
+@test "range: accepts spec in default unit subdirectory" {
+    echo '#!/bin/bash' > x.sh
+    mkdir -p tests/unit
+    echo '#!/usr/bin/env bats' > tests/unit/x.bats
+    git add x.sh tests/unit/x.bats
+    git commit -m "add script with unit spec" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}
+
+@test "range: refusal names every default candidate" {
+    echo '#!/bin/bash' > x.sh
+    git add x.sh
+    git commit -m "add script without spec" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_failure
+    assert_output --partial "tests/x.bats, tests/unit/x.bats"
+}
+
 @test "strips scripts/ prefix for test path" {
     mkdir -p scripts/build tests/build
     echo '#!/bin/bash' > scripts/build/run.sh
@@ -248,6 +267,33 @@ setup() {
     run lefthook-tdd-order-bats --staged scripts/foo/bar.sh
     assert_failure
     assert_output --partial "tdd-order: staged"
+}
+
+@test "staged: accepts spec in default unit subdirectory" {
+    mkdir -p tests/unit
+    echo '#!/usr/bin/env bats' > tests/unit/x.bats
+    git add tests/unit/x.bats
+    echo '#!/bin/bash' > x.sh
+    run lefthook-tdd-order-bats --staged x.sh
+    assert_success
+}
+
+@test "staged: refusal names every default candidate" {
+    echo '#!/bin/bash' > x.sh
+    run lefthook-tdd-order-bats --staged x.sh
+    assert_failure
+    assert_output --partial "tests/x.bats, tests/unit/x.bats"
+}
+
+@test "staged: explicit spec directory uses only one candidate" {
+    export LEFTHOOK_TDD_SPEC_DIR=spec
+    mkdir -p tests/unit
+    echo '#!/usr/bin/env bats' > tests/unit/x.bats
+    echo '#!/bin/bash' > x.sh
+    run lefthook-tdd-order-bats --staged x.sh
+    assert_failure
+    assert_output --partial "spec/x.bats"
+    refute_output --partial "tests/unit/x.bats"
 }
 
 @test "staged: ignores old commits — only checks given files" {
