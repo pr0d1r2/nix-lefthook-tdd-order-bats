@@ -20,7 +20,7 @@
       set-and-setting,
       ...
     }:
-    {
+    {} // {
       packages =
         nixpkgs.lib.genAttrs
           [
