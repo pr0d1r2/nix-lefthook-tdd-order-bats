@@ -105,3 +105,13 @@ setup() {
     assert_line --index 0 "tests/x.bats"
     assert_line --index 1 "tests/unit/x.bats"
 }
+
+@test "underscore stem directly under scripts/ has no dot dir" {
+    run bash "$SCRIPT" "scripts/my_tool.sh"
+    assert_success
+    assert_line --index 0 "tests/my-tool.bats"
+    assert_line --index 1 "tests/my_tool.bats"
+    assert_line --index 2 "tests/unit/my-tool.bats"
+    assert_line --index 3 "tests/unit/my_tool.bats"
+    [ "${#lines[@]}" -eq 4 ]
+}
