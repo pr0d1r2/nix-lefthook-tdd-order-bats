@@ -20,7 +20,7 @@
       set-and-setting,
       ...
     }:
-    let
+    rec {
       systems = [
         "aarch64-darwin"
         "x86_64-darwin"
@@ -36,8 +36,7 @@
         "yaml"
       ];
 
-      packagesForSystem =
-        system:
+      packages = nixpkgs.lib.genAttrs systems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
@@ -63,10 +62,10 @@
                 ]
                 (builtins.readFile ./lefthook-tdd-order-bats.sh);
           };
-        };
+        }
+      );
 
-      devShellsForSystem =
-        system:
+      devShells = nixpkgs.lib.genAttrs systems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           mat = set-and-setting.lib.materializationFor {
@@ -99,10 +98,10 @@
               cp -f "$_assemble_out/lefthook.yml" lefthook.yml
               rm -rf "$_assemble_out"
             '';
-        };
+        }
+      );
 
-      checksForSystem =
-        system:
+      checks = nixpkgs.lib.genAttrs systems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
@@ -117,10 +116,10 @@
             projectRoot = ./.;
           };
           default = pkgs.runCommand "checks" { } "touch $out";
-        };
+        }
+      );
 
-      appsForSystem =
-        system:
+      apps = nixpkgs.lib.genAttrs systems (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           mat = set-and-setting.lib.materializationFor {
@@ -167,12 +166,7 @@
               }
             }/bin/confirm";
           };
-        };
-    in
-    {
-      packages = nixpkgs.lib.genAttrs systems packagesForSystem;
-      devShells = nixpkgs.lib.genAttrs systems devShellsForSystem;
-      checks = nixpkgs.lib.genAttrs systems checksForSystem;
-      apps = nixpkgs.lib.genAttrs systems appsForSystem;
+        }
+      );
     };
 }
