@@ -252,7 +252,7 @@ setup() {
     assert_failure
     assert_output --partial "tests/x.bats, tests/unit/x.bats"
 }
-@test "staged: explicit spec directory uses only one candidate" {
+@test "staged: one spec dir candidate" {
     export LEFTHOOK_TDD_SPEC_DIR=spec
     mkdir -p tests/unit
     echo '#!/usr/bin/env bats' > tests/unit/x.bats
@@ -262,7 +262,7 @@ setup() {
     assert_output --partial "spec/x.bats"
     refute_output --partial "tests/unit/x.bats"
 }
-@test "staged: ignores old commits — only checks given files" {
+@test "staged: only checks given files" {
     mkdir -p scripts/old
     echo '#!/bin/bash' > scripts/old/gap.sh
     git add scripts/old/gap.sh
@@ -284,10 +284,20 @@ setup() {
     run lefthook-tdd-order-bats --staged scripts/foo/bar.sh
     assert_success
 }
-@test "staged: filters non-.sh from mixed file list" {
+@test "staged: filters non-.sh files" {
     mkdir -p scripts/foo tests/foo
     echo '#!/bin/bash' > scripts/foo/bar.sh
     echo '#!/usr/bin/env bats' > tests/foo/bar.bats
     run lefthook-tdd-order-bats --staged scripts/foo/bar.sh README.md flake.nix
+    assert_success
+}
+
+@test "range: top-level file with unit spec" {
+    mkdir -p scripts tests/unit
+    echo '#!/bin/bash' > scripts/x.sh
+    echo '#!/usr/bin/env bats' > tests/unit/x.bats
+    git add scripts/x.sh tests/unit/x.bats
+    git commit -m "add top-level script with unit spec" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
     assert_success
 }

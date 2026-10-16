@@ -17,7 +17,8 @@ strip_prefix="${LEFTHOOK_TDD_SRC_STRIP-scripts}"
 if [ -n "$strip_prefix" ]; then
   case "$f" in
     "${strip_prefix}"/*)
-      dir="$(echo "$f" | sed "s|^${strip_prefix}/||; s|/[^/]*\$||")"
+      stripped="${f#"${strip_prefix}"/}"
+      dir="$(dirname "$stripped")"
       ;;
     *)
       dir="$(dirname "$f")"
