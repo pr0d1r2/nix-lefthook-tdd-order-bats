@@ -36,7 +36,8 @@
         "yaml"
       ];
 
-      packages = nixpkgs.lib.genAttrs systems (system:
+      packages = nixpkgs.lib.genAttrs systems (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
@@ -65,7 +66,8 @@
         }
       );
 
-      devShells = nixpkgs.lib.genAttrs systems (system:
+      devShells = nixpkgs.lib.genAttrs systems (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           mat = set-and-setting.lib.materializationFor {
@@ -101,7 +103,8 @@
         }
       );
 
-      checks = nixpkgs.lib.genAttrs systems (system:
+      checks = nixpkgs.lib.genAttrs systems (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
@@ -119,7 +122,8 @@
         }
       );
 
-      apps = nixpkgs.lib.genAttrs systems (system:
+      apps = nixpkgs.lib.genAttrs systems (
+        system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           mat = set-and-setting.lib.materializationFor {
