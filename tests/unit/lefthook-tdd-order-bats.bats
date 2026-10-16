@@ -291,3 +291,13 @@ setup() {
     run lefthook-tdd-order-bats --staged scripts/foo/bar.sh README.md flake.nix
     assert_success
 }
+
+@test "range accepts top-level scripts file with unit spec" {
+    mkdir -p scripts tests/unit
+    echo '#!/bin/bash' > scripts/x.sh
+    echo '#!/usr/bin/env bats' > tests/unit/x.bats
+    git add scripts/x.sh tests/unit/x.bats
+    git commit -m "add top-level script with unit spec" >/dev/null 2>&1
+    run lefthook-tdd-order-bats
+    assert_success
+}

@@ -83,3 +83,25 @@ setup() {
     assert_success
     assert_line --index 0 "tests/unit/helper.bats"
 }
+
+@test "top-level file directly under scripts/ has no dot dir" {
+    run bash "$SCRIPT" "scripts/x.sh"
+    assert_success
+    assert_line --index 0 "tests/x.bats"
+    assert_line --index 1 "tests/unit/x.bats"
+    [ "${#lines[@]}" -eq 2 ]
+}
+
+@test "scripts/sub/x.sh keeps subdir" {
+    run bash "$SCRIPT" "scripts/sub/x.sh"
+    assert_success
+    assert_line --index 0 "tests/sub/x.bats"
+    assert_line --index 1 "tests/unit/sub/x.bats"
+}
+
+@test "custom LEFTHOOK_TDD_SRC_STRIP with top-level file has no dot dir" {
+    LEFTHOOK_TDD_SRC_STRIP="lib" run bash "$SCRIPT" "lib/x.sh"
+    assert_success
+    assert_line --index 0 "tests/x.bats"
+    assert_line --index 1 "tests/unit/x.bats"
+}
