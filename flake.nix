@@ -20,7 +20,7 @@
       set-and-setting,
       ...
     }:
-    let
+    rec {
       systems = [
         "aarch64-darwin"
         "x86_64-darwin"
@@ -36,7 +36,7 @@
         "yaml"
       ];
 
-      packagesForSystem =
+      packages = nixpkgs.lib.genAttrs systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -63,9 +63,10 @@
                 ]
                 (builtins.readFile ./lefthook-tdd-order-bats.sh);
           };
-        };
+        }
+      );
 
-      devShellsForSystem =
+      devShells = nixpkgs.lib.genAttrs systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -99,9 +100,10 @@
               cp -f "$_assemble_out/lefthook.yml" lefthook.yml
               rm -rf "$_assemble_out"
             '';
-        };
+        }
+      );
 
-      checksForSystem =
+      checks = nixpkgs.lib.genAttrs systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -117,9 +119,10 @@
             projectRoot = ./.;
           };
           default = pkgs.runCommand "checks" { } "touch $out";
-        };
+        }
+      );
 
-      appsForSystem =
+      apps = nixpkgs.lib.genAttrs systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -167,12 +170,7 @@
               }
             }/bin/confirm";
           };
-        };
-    in
-    {
-      packages = nixpkgs.lib.genAttrs systems packagesForSystem;
-      devShells = nixpkgs.lib.genAttrs systems devShellsForSystem;
-      checks = nixpkgs.lib.genAttrs systems checksForSystem;
-      apps = nixpkgs.lib.genAttrs systems appsForSystem;
+        }
+      );
     };
 }
