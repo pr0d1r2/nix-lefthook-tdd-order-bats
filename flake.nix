@@ -20,7 +20,7 @@
       set-and-setting,
       ...
     }:
-    rec {
+    {
       systems = [
         "aarch64-darwin"
         "x86_64-darwin"
@@ -36,7 +36,7 @@
         "yaml"
       ];
 
-      packages = nixpkgs.lib.genAttrs systems (
+      packages = nixpkgs.lib.genAttrs self.systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -66,13 +66,13 @@
         }
       );
 
-      devShells = nixpkgs.lib.genAttrs systems (
+      devShells = nixpkgs.lib.genAttrs self.systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           mat = set-and-setting.lib.materializationFor {
             inherit pkgs;
-            fragments = commonFragments;
+            fragments = self.commonFragments;
           };
           sys = pkgs.stdenv.hostPlatform.system;
           batsWithLibraries = pkgs.bats.withLibraries (libraries: [
@@ -93,7 +93,7 @@
             + ''
               ${self.packages.${sys}.setting}/bin/sync-setting .
               _assemble_out="$(mktemp -d)"
-              FRAGMENTS="${builtins.concatStringsSep " " commonFragments}" \
+              FRAGMENTS="${builtins.concatStringsSep " " self.commonFragments}" \
                 out="$_assemble_out" \
                 FRAGMENTS_DIR="${set-and-setting}/setting/integrations/lefthook" \
                 bash "${set-and-setting}/setting/lib/assemble-lefthook.sh"
@@ -103,14 +103,14 @@
         }
       );
 
-      checks = nixpkgs.lib.genAttrs systems (
+      checks = nixpkgs.lib.genAttrs self.systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
         (set-and-setting.lib.checksFor {
           inherit pkgs;
-          fragments = commonFragments;
+          fragments = self.commonFragments;
           src = ./.;
         })
         // {
@@ -122,13 +122,13 @@
         }
       );
 
-      apps = nixpkgs.lib.genAttrs systems (
+      apps = nixpkgs.lib.genAttrs self.systems (
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
           mat = set-and-setting.lib.materializationFor {
             inherit pkgs;
-            fragments = commonFragments;
+            fragments = self.commonFragments;
           };
           sys = pkgs.stdenv.hostPlatform.system;
         in
