@@ -1,5 +1,7 @@
 # nix-lefthook-tdd-order-bats
 
+[![Nixpkgs](https://img.shields.io/badge/nixpkgs-26.05-blue.svg)](https://github.com/NixOS/nixpkgs/tree/nixpkgs-26.05)
+
 <!-- hallucinogen:autonomy-disclaimer start -->
 > Read [LLM-DISCLAIMER](docs/LLM-DISCLAIMER.md) first. This repository is
 > tended by an autonomous loop, and that file says what the loop may do here,
