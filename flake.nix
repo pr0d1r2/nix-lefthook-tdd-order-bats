@@ -15,6 +15,12 @@
     set-and-setting.follows = "nixpkgs-lock/set-and-setting";
   };
 
-  outputs = { self, nixpkgs, set-and-setting, ... }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      set-and-setting,
+      ...
+    }:
     import ./outputs.nix { inherit self nixpkgs set-and-setting; };
 }
