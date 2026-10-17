@@ -32,6 +32,24 @@ underscore-containing filenames, the hyphen-normalized name is tried before
 the raw name at each location. Setting `LEFTHOOK_TDD_SPEC_DIR` disables the
 `tests/unit/` fallback and uses only that directory.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  hook["consumer lefthook.yml"] -->|"pre-commit: --staged files"| bin["lefthook-tdd-order-bats"]
+  hook -->|"pre-push: no args"| bin
+  bin -->|"each .sh path"| excl["is-excluded-path.sh"]
+  bin -->|"each .sh path"| map["spec-path-for-file.sh"]
+  map -->|"candidate .bats paths"| bin
+  bin -->|"pre-commit: test -f"| wt["working tree"]
+  bin -->|"pre-push: rev-list base..HEAD, cat-file -e"| git["git history"]
+  bin -->|"exit 1 on spec gap"| hook
+```
+
+The flake package (`writeShellApplication`) inlines the store paths of both
+helper scripts into the main binary; `lefthook-remote.yml` wires that binary
+into consumer hooks.
+
 ## Usage
 
 ### Option A: Lefthook remote (recommended)
@@ -123,6 +141,20 @@ If not using direnv, enter the shell manually:
 ```bash
 nix develop
 bats tests/unit/
+```
+
+### Development architecture
+
+```mermaid
+flowchart LR
+  envrc[".envrc"] -->|"use flake"| flake["flake.nix / outputs.nix"]
+  flake -->|"input"| sas["set-and-setting"]
+  flake -->|"devShell"| shell["dev shell: bats, linters, lefthook-tdd-order-bats"]
+  shell -->|"settingHook"| devsh["dev.sh: BATS_LIB_PATH, lefthook install"]
+  sas -->|"assembled fragments"| lh["lefthook.yml"]
+  repo["lefthook-repo.yml"] --> lh
+  lh -->|"pre-commit / pre-push"| checks["linters, tdd-order-bats, nix flake check"]
+  ci[".github/workflows/ci.yml"] -->|"guardrails.yml"| checks
 ```
 
 ## License
