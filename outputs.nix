@@ -57,11 +57,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
           commonFragments = [
             "base"
+            "actions"
             "nix"
             "shell"
             "ascii"
+            "bats"
             "markdown"
             "yaml"
+            "toml"
           ];
           mat = set-and-setting.lib.materializationFor {
             inherit pkgs;
@@ -110,11 +113,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
           commonFragments = [
             "base"
+            "actions"
             "nix"
             "shell"
             "ascii"
+            "bats"
             "markdown"
             "yaml"
+            "toml"
           ];
         in
         (set-and-setting.lib.checksFor {
@@ -145,11 +151,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
           commonFragments = [
             "base"
+            "actions"
             "nix"
             "shell"
             "ascii"
+            "bats"
             "markdown"
             "yaml"
+            "toml"
           ];
           mat = set-and-setting.lib.materializationFor {
             inherit pkgs;
