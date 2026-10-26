@@ -57,11 +57,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
           commonFragments = [
             "base"
+            "actions"
             "nix"
             "shell"
             "ascii"
+            "bats"
             "markdown"
             "yaml"
+            "toml"
           ];
           mat = set-and-setting.lib.materializationFor {
             inherit pkgs;
@@ -75,10 +78,13 @@
         in
         set-and-setting.lib.mkDevShells {
           inherit pkgs;
-          basePackages = mat.packages ++ [
+          # Own build first: the bats fragment also ships a pinned
+          # lefthook-tdd-order-bats that would otherwise shadow it.
+          basePackages = [
             self.packages.${sys}.default
             batsWithLibraries
-          ];
+          ]
+          ++ mat.packages;
           settingHook =
             builtins.replaceStrings [ "@BATS_LIB_PATH@" ] [ "${batsWithLibraries}" ] (
               builtins.readFile ./bats-lib-path.env
@@ -110,11 +116,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
           commonFragments = [
             "base"
+            "actions"
             "nix"
             "shell"
             "ascii"
+            "bats"
             "markdown"
             "yaml"
+            "toml"
           ];
         in
         (set-and-setting.lib.checksFor {
@@ -145,11 +154,14 @@
           pkgs = nixpkgs.legacyPackages.${system};
           commonFragments = [
             "base"
+            "actions"
             "nix"
             "shell"
             "ascii"
+            "bats"
             "markdown"
             "yaml"
+            "toml"
           ];
           mat = set-and-setting.lib.materializationFor {
             inherit pkgs;
