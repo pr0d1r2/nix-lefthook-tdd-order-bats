@@ -2,8 +2,8 @@
 # shellcheck disable=SC2030,SC2031
 
 setup() {
-    load "${BATS_LIB_PATH}/bats-support/load"
-    load "${BATS_LIB_PATH}/bats-assert/load"
+    bats_load_library bats-support
+    bats_load_library bats-assert
 
     unset LEFTHOOK_TDD_SPEC_DIR
     unset LEFTHOOK_TDD_SRC_STRIP
